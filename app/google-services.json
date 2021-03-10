@@ -1,0 +1,85 @@
+{
+  "project_info": {
+    "project_number": "384576297525",
+    "firebase_url": "https://kotlinapp3-default-rtdb.firebaseio.com",
+    "project_id": "kotlinapp3",
+    "storage_bucket": "kotlinapp3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:384576297525:android:dea844b09bd96dee302f7c",
+        "android_client_info": {
+          "package_name": "com.example.kotlinapp3"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "384576297525-3bft2sbmqa8cs989efvevbnf4sjmrkt4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.kotlinapp3",
+            "certificate_hash": "7eeb96a4d2a107336fc6d3fa3f16495bf4241bea"
+          }
+        },
+        {
+          "client_id": "384576297525-7erae75q3domea116okfnke8l64f1rn2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.kotlinapp3",
+            "certificate_hash": "af639491edaad38bb18e6de4aea5d46c1c0bb67b"
+          }
+        },
+        {
+          "client_id": "384576297525-jger3kdv4e7icdd5siefv3op51uchqs2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABVTaveNEL-AwsqeqM7F7fzI3MYc9qzDc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "384576297525-jger3kdv4e7icdd5siefv3op51uchqs2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:384576297525:android:59427d1c091b215f302f7c",
+        "android_client_info": {
+          "package_name": "com.example.kotlinapprider"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "384576297525-jger3kdv4e7icdd5siefv3op51uchqs2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABVTaveNEL-AwsqeqM7F7fzI3MYc9qzDc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "384576297525-jger3kdv4e7icdd5siefv3op51uchqs2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
