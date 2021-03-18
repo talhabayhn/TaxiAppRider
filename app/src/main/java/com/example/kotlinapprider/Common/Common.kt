@@ -10,11 +10,25 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.example.kotlinapprider.Model.DriverGeoModel
 import com.example.kotlinapprider.Model.RiderInfoModel
 import com.example.kotlinapprider.R
+import com.google.android.gms.maps.model.Marker
 import java.lang.StringBuilder
 
 object Common {
+    val markerList: MutableMap<String,Marker> = HashMap<String,Marker>()
+    val DRIVER_INFO_REFERENCE: String="DriverInfo"
+    val driversFound: MutableSet<DriverGeoModel> = HashSet<DriverGeoModel>()
+    val DRIVERS_LOCATION_REFERENCES: String="DriversLocation" //load drivers
+
+    val NOTI_TITLE: String= "title"// for fcm
+    val NOTI_BODY: String ="body"
+    val TOKEN_REFERENCE: String="Token"
+
+    val DRIVERS_LOCATION_REFERENCE : String="riders locations"
+    var currentRider: RiderInfoModel?= null
+    val RIDER_INFO_REFERENCE: String="riders"
 
 
     fun buildWelcomeMessage(): String {
@@ -60,13 +74,9 @@ object Common {
 
     }
 
+    fun buildName(firstName: String?, lastName: String?): String? {
+        return java.lang.StringBuilder(firstName).append(" ").append(lastName).toString()
+    }
 
-    val NOTI_TITLE: String= "title"// for fcm
-    val NOTI_BODY: String ="body"
-    val TOKEN_REFERENCE: String="Token"
-
-    val DRIVERS_LOCATION_REFERENCE : String="riders locations"
-    var currentRider: RiderInfoModel?= null
-    val RIDER_INFO_REFERENCE: String="riders"
 
 }

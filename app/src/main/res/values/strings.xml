@@ -20,6 +20,9 @@
     <string name="menu_signout">Sign out</string>
     <string name="menu_profil">Profil</string>
     <string name="title_activity_maps">Map</string>
+    <string name="permission_require">Permission Location required</string>
+    <string name="drivers_not_found">Driver not Found</string>
+    <string name="key_not_found">key driver not found</string>
 
 
 </resources>
