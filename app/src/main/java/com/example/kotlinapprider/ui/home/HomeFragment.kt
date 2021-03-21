@@ -93,16 +93,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
 
     val compositeDisposable = CompositeDisposable()// ???????????
     lateinit var iGoogleAPI: IGoogleAPI
-    // moving marker
-    var polylineList: java.util.ArrayList<LatLng?>?= null
-    var handler: Handler?= null // Handler ?
-    var index: Int=0
-    var next: Int= 0
-    var v: Float=0.0f
-    var lat: Double=0.0
-    var lng: Double=0.0
-    var end: LatLng?= null
-    var start: LatLng?= null
+
 
 
     private val onlineValueEventListener = object : ValueEventListener {
@@ -616,41 +607,41 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
                             val route = jsonArray.getJSONObject(i)
                             val poly = route.getJSONObject("overview_polyline")
                             val polyline = poly.getString("points")
-                            polylineList = Common.decodePoly(polyline)
+                            //polylineList = Common.decodePoly(polyline)
+                            newData.polylineList= Common.decodePoly(polyline)
                         }
 
                         // moving
-                        handler = Handler()
-                        index = -1
-                        next =1
+                        newData.index= -1
+                        newData.next= 1
 
                         val runnable = object : Runnable{
                             override fun run() {
-                                if(polylineList!!.size >1)
+                                if(newData.polylineList!=null &&newData.polylineList!!.size >1)
                                 {
-                                    if(index <polylineList!!.size-2)
+                                    if(newData.index <newData.polylineList!!.size-2)
                                     {
-                                        index++
-                                        next = index+1
-                                        start = polylineList!![index]!!
-                                        end = polylineList!![next]!!
+                                        newData.index++
+                                        newData.next = newData.index+1
+                                        newData.start = newData.polylineList!![newData.index]!!
+                                        newData.end = newData.polylineList!![newData.next]!!
                                     }
                                     val valueAnimator = ValueAnimator.ofInt(0,1)
                                     valueAnimator.duration= 3000
                                     valueAnimator.interpolator = LinearInterpolator()
                                     valueAnimator.addUpdateListener { value ->
-                                        v= value.animatedFraction
-                                        lat = v*end!!.latitude +(1-v) * start!!.latitude
-                                        lng = v*end!!.longitude +(1-v) * start!!.longitude
-                                        val newPos = LatLng(lat,lng)
+                                        newData.v= value.animatedFraction
+                                        newData.lat = newData.v*newData.end!!.latitude +(1-newData.v) * newData.start!!.latitude
+                                        newData.lng = newData.v*newData.end!!.longitude +(1-newData.v) * newData.start!!.longitude
+                                        val newPos = LatLng(newData.lat,newData.lng)
                                         marker!!.position = newPos
                                         marker!!.setAnchor(0.5f,0.5f)
-                                        marker!!.rotation = Common.getBearing(start!!,newPos)
+                                        marker!!.rotation = Common.getBearing(newData.start!!,newPos)
                                     }
                                     valueAnimator.start()
-                                    if(index < polylineList!!.size -2)
-                                        handler!!.postDelayed(this,1500)
-                                    else if( index<polylineList!!.size-1)
+                                    if(newData.index < newData.polylineList!!.size -2)
+                                        newData.handler!!.postDelayed(this,1500)
+                                    else if( newData.index<newData.polylineList!!.size-1)
                                     {
                                         newData.isRun= false
                                         Common.driverSubscribe.put(key,newData) // to update
@@ -661,7 +652,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
 
                         }
 
-                        handler!!.postDelayed(runnable,1500)
+                        newData.handler!!.postDelayed(runnable,1500)
 
                     }catch (e:java.lang.Exception)
                     {
