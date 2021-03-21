@@ -10,13 +10,17 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.example.kotlinapprider.Model.AnimationModel
 import com.example.kotlinapprider.Model.DriverGeoModel
 import com.example.kotlinapprider.Model.RiderInfoModel
 import com.example.kotlinapprider.R
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import java.lang.StringBuilder
 
 object Common {
+    val driverSubscribe: MutableMap<String, AnimationModel> = HashMap<String,AnimationModel>()
+
     val markerList: MutableMap<String,Marker> = HashMap<String,Marker>()
     val DRIVER_INFO_REFERENCE: String="DriverInfo"
     val driversFound: MutableSet<DriverGeoModel> = HashSet<DriverGeoModel>()
@@ -76,6 +80,64 @@ object Common {
 
     fun buildName(firstName: String?, lastName: String?): String? {
         return java.lang.StringBuilder(firstName).append(" ").append(lastName).toString()
+    }
+
+
+
+    // Car animation
+     fun decodePoly(encoded: String): ArrayList<LatLng?> {
+        val poly = ArrayList<LatLng?>()
+        var index = 0
+        val len = encoded.length
+        var lat = 0
+        var lng = 0
+
+        while (index < len) {
+            var b: Int
+            var shift = 0
+            var result = 0
+            do {
+                b = encoded[index++].toInt() - 63
+                result = result or (b and 0x1f shl shift)
+                shift += 5
+            } while (b >= 0x20)
+            val dlat = if (result and 1 != 0) (result shr 1).inv() else result shr 1
+            lat += dlat
+
+            shift = 0
+            result = 0
+            do {
+                b = encoded[index++].toInt() - 63
+                result = result or (b and 0x1f shl shift)
+                shift += 5
+            } while (b >= 0x20)
+            val dlng = if (result and 1 != 0) (result shr 1).inv() else result shr 1
+            lng += dlng
+
+            val p = LatLng(lat.toDouble() / 1E5,
+                lng.toDouble() / 1E5)
+            poly.add(p)
+        }
+
+        return poly
+    }
+
+
+
+    //GET BEARING
+    fun getBearing(begin: LatLng, end: LatLng): Float {
+        val lat = Math.abs(begin.latitude - end.latitude)
+        val lng = Math.abs(begin.longitude - end.longitude)
+
+        if (begin.latitude < end.latitude && begin.longitude < end.longitude)
+            return Math.toDegrees(Math.atan(lng / lat)).toFloat()
+        else if (begin.latitude >= end.latitude && begin.longitude < end.longitude)
+            return ((90 - Math.toDegrees(Math.atan(lng / lat)) + 90).toFloat())
+        else if (begin.latitude >= end.latitude && begin.longitude >= end.longitude)
+            return ((Math.toDegrees(Math.atan(lng / lat)) + 180).toFloat())
+        else if (begin.latitude < end.latitude && begin.longitude >= end.longitude)
+            return (((90 - Math.toDegrees(Math.atan(lng / lat))) + 270).toFloat())
+        return (-1f).toFloat()
     }
 
 

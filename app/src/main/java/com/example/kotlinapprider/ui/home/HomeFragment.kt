@@ -1,6 +1,7 @@
 package com.example.kotlinapprider.ui.home
 
 import android.Manifest
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.content.res.Resources
@@ -9,12 +10,14 @@ import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
+import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.LinearInterpolator
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -26,10 +29,13 @@ import com.bumptech.glide.Glide.init
 import com.example.kotlinapprider.Callback.FirebaseDriverInfoListener
 import com.example.kotlinapprider.Callback.FirebaseFailedlistener
 import com.example.kotlinapprider.Common.Common
+import com.example.kotlinapprider.Model.AnimationModel
 import com.example.kotlinapprider.Model.DriverGeoModel
 import com.example.kotlinapprider.Model.DriverInfoModel
 import com.example.kotlinapprider.Model.GeoQueryModel
 import com.example.kotlinapprider.R
+import com.example.kotlinapprider.Remote.IGoogleAPI
+import com.example.kotlinapprider.Remote.RetrofitClient
 import com.firebase.geofire.GeoFire
 
 import com.firebase.geofire.GeoLocation
@@ -53,14 +59,15 @@ import com.karumi.dexter.listener.single.PermissionListener
 import io.reactivex.Observable
 import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import org.json.JSONObject
 import java.io.IOException
 import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
 
 class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener {
-
     private lateinit var homeViewModel: HomeViewModel
     private lateinit var mMap: GoogleMap
     private lateinit var mapFragment: SupportMapFragment
@@ -84,6 +91,19 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
     lateinit var iFirebaseFailedListener: FirebaseFailedlistener
     var cityName = ""
 
+    val compositeDisposable = CompositeDisposable()// ???????????
+    lateinit var iGoogleAPI: IGoogleAPI
+    // moving marker
+    var polylineList: java.util.ArrayList<LatLng?>?= null
+    var handler: Handler?= null // Handler ?
+    var index: Int=0
+    var next: Int= 0
+    var v: Float=0.0f
+    var lat: Double=0.0
+    var lng: Double=0.0
+    var end: LatLng?= null
+    var start: LatLng?= null
+
 
     private val onlineValueEventListener = object : ValueEventListener {
 
@@ -97,6 +117,11 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
             }
         }
 
+    }
+
+    override fun onStop() {
+        compositeDisposable.clear() //????????
+        super.onStop()
     }
 
     override fun onDestroy() {
@@ -130,6 +155,9 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
     }
 
     private fun init() {
+
+        iGoogleAPI= RetrofitClient.instance!!.create(IGoogleAPI::class.java)
+
         iFirebaseDriverInfoListener = this
 
         // online sys following
@@ -208,9 +236,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
             locationCallback,
             Looper.myLooper()
         )
-
-     //  println("---"+Common.driversFound(0))
-
     }
 
     //load map
@@ -305,7 +330,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
 
     }
 
-
     private fun loadAvaibleDrivers() {
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
@@ -386,7 +410,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
 
                     })
 
-                    /*driver_location_ref.addChildEventListener(object : ChildEventListener {
+                    driver_location_ref.addChildEventListener(object : ChildEventListener {
                         override fun onChildAdded(
                             snapshot: DataSnapshot,
                             previousChildName: String?
@@ -423,7 +447,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
                                 .show()
                         }
 
-                    })*/
+                    })
                 } catch (e: IOException) {
                     Snackbar.make(
                         requireView(),
@@ -433,8 +457,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
                 }
             }
     }
-
-
 
     private fun addDriverMarker() {
 
@@ -472,9 +494,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
                         driverGeoModel.driverInfoModel =
                             (snapshot.getValue(DriverInfoModel::class.java))
                         iFirebaseDriverInfoListener.onDriverInfoLoadSuccess(driverGeoModel)
-                        /*println("key-"+driverGeoModel.key)
-                        println("driverinfomodel-"+driverGeoModel.driverInfoModel)
-                        println("geolocation-"+driverGeoModel.geoLocation)*/      //  driverin tüm bilgileri geliyor
+
 
                     } else {
                         iFirebaseFailedListener.onFirebaseFailed(getString(R.string.key_not_found) + driverGeoModel.key)
@@ -487,8 +507,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
 
             })
     }
-
-
 
     override fun onDriverInfoLoadSuccess(driverGeoModel: DriverGeoModel?) {
         // if already have marker with this key, does not see it again
@@ -504,7 +522,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
                             )
                         )
                         .snippet(driverGeoModel.driverInfoModel!!.phoneNumber)
-                        //.icon(BitmapDescriptorFactory.fromResource(R.drawable.fui_ic_phone_white_24dp))
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.car)))
 
             )
@@ -525,8 +542,40 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
                             val marker = Common.markerList.get(driverGeoModel!!.key!!)
                            marker!!.remove() // remove marker from map
                             Common.markerList.remove(driverGeoModel!!.key!!) // remove marker info
+
+                            Common.driverSubscribe.remove(driverGeoModel.key!!) // remove driver info
+
                             driverLocation.removeEventListener(this)
 
+                        }
+
+                    }
+                    else{
+                        if (Common.markerList.get(driverGeoModel!!.key!!) != null){
+                            val geoQueryModel = snapshot!!.getValue(GeoQueryModel::class.java)
+                            val animationModel = AnimationModel(false,geoQueryModel!!)
+                            if (Common.driverSubscribe.get(driverGeoModel.key!!) != null)
+                            {
+                                val marker =Common.markerList.get(driverGeoModel!!.key!!)
+                                val oldPosition= Common.driverSubscribe.get(driverGeoModel.key!!)
+
+                                val from= StringBuilder()
+                                    .append(oldPosition!!.geoQueryModel!!.l?.get(0))
+                                    .append(",")
+                                    .append(oldPosition!!.geoQueryModel!!.l?.get(1))
+                                    .toString()
+
+                                val to= StringBuilder()
+                                    .append(animationModel.geoQueryModel!!.l?.get(0))
+                                    .append(",")
+                                    .append(animationModel.geoQueryModel!!.l?.get(1))
+                                    .toString()
+
+                                moveMarkerAnimation(driverGeoModel.key!!,animationModel,marker,from,to)
+                            }
+                            else{
+                                Common.driverSubscribe.put(driverGeoModel.key!!,animationModel)
+                            }
                         }
 
                     }
@@ -538,6 +587,91 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
 
             })
         }
+
+    }
+
+    private fun moveMarkerAnimation(key: String
+                                    , newData: AnimationModel
+                                    , marker: Marker?
+                                    , from: String
+                                    , to:String)
+    {
+        if(!newData.isRun)
+        {
+            //Request API
+            compositeDisposable.add(iGoogleAPI.getDirections("driving",
+            "less_driving",from,to,
+            getString(R.string.google_api_key))
+                !!.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe{ returnResult ->
+
+                    Log.d("API_RETURN",returnResult)
+                    try{
+                        val jsonObject= JSONObject(returnResult)
+                        val jsonArray = jsonObject.getJSONArray("routes")
+
+                        for(i in 0 until jsonArray.length())
+                        {
+                            val route = jsonArray.getJSONObject(i)
+                            val poly = route.getJSONObject("overview_polyline")
+                            val polyline = poly.getString("points")
+                            polylineList = Common.decodePoly(polyline)
+                        }
+
+                        // moving
+                        handler = Handler()
+                        index = -1
+                        next =1
+
+                        val runnable = object : Runnable{
+                            override fun run() {
+                                if(polylineList!!.size >1)
+                                {
+                                    if(index <polylineList!!.size-2)
+                                    {
+                                        index++
+                                        next = index+1
+                                        start = polylineList!![index]!!
+                                        end = polylineList!![next]!!
+                                    }
+                                    val valueAnimator = ValueAnimator.ofInt(0,1)
+                                    valueAnimator.duration= 3000
+                                    valueAnimator.interpolator = LinearInterpolator()
+                                    valueAnimator.addUpdateListener { value ->
+                                        v= value.animatedFraction
+                                        lat = v*end!!.latitude +(1-v) * start!!.latitude
+                                        lng = v*end!!.longitude +(1-v) * start!!.longitude
+                                        val newPos = LatLng(lat,lng)
+                                        marker!!.position = newPos
+                                        marker!!.setAnchor(0.5f,0.5f)
+                                        marker!!.rotation = Common.getBearing(start!!,newPos)
+                                    }
+                                    valueAnimator.start()
+                                    if(index < polylineList!!.size -2)
+                                        handler!!.postDelayed(this,1500)
+                                    else if( index<polylineList!!.size-1)
+                                    {
+                                        newData.isRun= false
+                                        Common.driverSubscribe.put(key,newData) // to update
+                                    }
+
+                                }
+                            }
+
+                        }
+
+                        handler!!.postDelayed(runnable,1500)
+
+                    }catch (e:java.lang.Exception)
+                    {
+                        Snackbar.make(requireView(),e.message!!,Snackbar.LENGTH_LONG).show()
+                    }
+
+                }
+            )
+        }
+
 
     }
 
