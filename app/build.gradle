@@ -23,6 +23,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
         }
     }
     compileOptions {
@@ -93,13 +94,22 @@ dependencies {
     //GeoFire
     implementation 'com.firebase:geofire-android:3.0.0'
 
-    // retrofit
+    // retrofit // direciton map apileri için
     implementation 'com.squareup.retrofit2:retrofit:2.1.0'
-
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.6.1'
     implementation 'com.squareup.retrofit2:converter-scalars:2.6.1'
     implementation 'com.squareup.retrofit2:converter-gson:2.6.1'
 
+    // slide up for google places
+    implementation 'com.sothree.slidinguppanel:library:3.3.1'
 
+    //google places
+    implementation 'com.google.android.libraries.places:places:2.3.0'
+
+    // greenRobot EVENTBUS
+    implementation 'org.greenrobot:eventbus:3.2.0'
+
+    //Maps Utils
+    implementation 'com.google.maps.android:android-maps-utils-v3:2.2.0' ////2.2.02.0.3
 
 }

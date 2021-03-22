@@ -23,6 +23,10 @@
     <string name="permission_require">Permission Location required</string>
     <string name="drivers_not_found">Driver not Found</string>
     <string name="key_not_found">key driver not found</string>
+    <string name="welcome">Good day</string>
+    <string name="choose_a_saved_place">Choose a saved place</string>
+    <string name="city_name_not_found">City name not found</string>
+    <string name="title_activity_request_driver">Map</string>
 
 
 </resources>

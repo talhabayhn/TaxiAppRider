@@ -9,6 +9,7 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Build
+import android.widget.TextView
 import androidx.core.app.NotificationCompat
 import com.example.kotlinapprider.Model.AnimationModel
 import com.example.kotlinapprider.Model.DriverGeoModel
@@ -17,6 +18,10 @@ import com.example.kotlinapprider.R
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import java.lang.StringBuilder
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 
 object Common {
     val driverSubscribe: MutableMap<String, AnimationModel> = HashMap<String,AnimationModel>()
@@ -79,7 +84,7 @@ object Common {
     }
 
     fun buildName(firstName: String?, lastName: String?): String? {
-        return java.lang.StringBuilder(firstName).append(" ").append(lastName).toString()
+        return StringBuilder(firstName).append(" ").append(lastName).toString()
     }
 
 
@@ -122,8 +127,6 @@ object Common {
         return poly
     }
 
-
-
     //GET BEARING
     fun getBearing(begin: LatLng, end: LatLng): Float {
         val lat = Math.abs(begin.latitude - end.latitude)
@@ -138,6 +141,29 @@ object Common {
         else if (begin.latitude < end.latitude && begin.longitude >= end.longitude)
             return (((90 - Math.toDegrees(Math.atan(lng / lat))) + 270).toFloat())
         return (-1f).toFloat()
+    }
+
+    fun setWelcomeMessage(txtWelcome: TextView) {
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        if(hour >= 1 && hour <=12)
+            txtWelcome.setText(StringBuilder("Good morning"))
+        else if(hour > 12 && hour <=12)
+            txtWelcome.setText(StringBuilder("Good afternoon"))
+        else
+            txtWelcome.setText(StringBuilder("Good evening"))
+
+    }
+
+    fun formatDuration(duration: String): CharSequence? {
+        if(duration.contains("mins"))
+            return duration.substring(0,duration.length-1)
+        else
+            return duration
+    }
+
+    fun formatAddress(startAddress: String): CharSequence? {
+        val firstIndexComma = startAddress.indexOf(",")
+        return startAddress.substring(0,firstIndexComma)
     }
 
 
