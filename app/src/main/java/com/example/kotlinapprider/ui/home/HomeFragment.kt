@@ -204,7 +204,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
             }
 
             override fun onError(p0: Status) {
-                Snackbar.make(requireView(),p0.statusMessage!!,Snackbar.LENGTH_LONG).show()
+                Snackbar.make(requireView(),""+p0.statusMessage!!,Snackbar.LENGTH_LONG).show()
             }
 
         })
