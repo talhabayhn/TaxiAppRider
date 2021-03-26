@@ -445,10 +445,13 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
                         geoQuerry.removeAllListeners()
 
                         geoQuerry.addGeoQueryEventListener(object : GeoQueryEventListener {
+
                             override fun onKeyEntered(key: String?, location: GeoLocation?) {
-                                Common.driversFound.add(DriverGeoModel(key!!, location!!))
-                                println(Common.driversFound.size)
-                                println("entered")
+                                //Common.driversFound.add(DriverGeoModel(key!!, location!!))
+                                if(!Common.driversFound.containsKey(key))
+                                    Common.driversFound[key!!] = DriverGeoModel(key,location)
+                                //println(Common.driversFound.size)
+                                //println("entered")
                                 //println("key is :"+key+" lcoation is:"+location)
                             }
 
@@ -535,15 +538,18 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
 
     private fun addDriverMarker() {
 
-        if (Common.driversFound.size > 0) {
-            Observable.fromIterable(Common.driversFound)
+        if (Common.driversFound.size > 0)
+        {
+            Observable.fromIterable(Common.driversFound.keys)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                    { driverGeoModel: DriverGeoModel? ->
-                        findDriverByKey(driverGeoModel)
-                        println("adddrivermarkerdrivergeomodel--"+driverGeoModel)  //com.example.kotlinapprider.Model.DriverGeoModel@60828d4 ve com.example.kotlinapprider.Model.DriverGeoModel@71f3110 yükledi
+
+                    { key: String? ->
+                        findDriverByKey(Common.driversFound[key!!])
+                        //println("adddrivermarkerdrivergeomodel--"+driverGeoModel)  //com.example.kotlinapprider.Model.DriverGeoModel@60828d4 ve com.example.kotlinapprider.Model.DriverGeoModel@71f3110 yükledi
                     },
+
                     { t: Throwable? ->
                         Snackbar.make(requireView(), t!!.message!!, Snackbar.LENGTH_SHORT).show()
                     }
@@ -566,8 +572,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback, FirebaseDriverInfoListener 
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.hasChildren()) {
 
-                        driverGeoModel.driverInfoModel =
-                            (snapshot.getValue(DriverInfoModel::class.java))
+                        driverGeoModel.driverInfoModel = (snapshot.getValue(DriverInfoModel::class.java))
+                        Common.driversFound[driverGeoModel.key!!]!!.driverInfoModel =    (snapshot.getValue(DriverInfoModel::class.java))
                         iFirebaseDriverInfoListener.onDriverInfoLoadSuccess(driverGeoModel)
 
 

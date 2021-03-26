@@ -25,11 +25,13 @@ import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
 object Common {
+    val PICKUP_LOCATION: String= "PickupLocation"
+    val REQUEST_DRIVER_TITLE: String= "RequestDriver"
     val driverSubscribe: MutableMap<String, AnimationModel> = HashMap<String,AnimationModel>()
 
     val markerList: MutableMap<String,Marker> = HashMap<String,Marker>()
     val DRIVER_INFO_REFERENCE: String="DriverInfo"
-    val driversFound: MutableSet<DriverGeoModel> = HashSet<DriverGeoModel>()
+    val driversFound: MutableMap<String,DriverGeoModel> = HashMap<String,DriverGeoModel>()
     val DRIVERS_LOCATION_REFERENCES: String="DriversLocation" //load drivers
 
     val NOTI_TITLE: String= "title"// for fcm
