@@ -71,6 +71,9 @@ object UserUtils {
                         val notificationData: MutableMap<String,String> = HashMap()
                         notificationData.put(Common.NOTI_TITLE,Common.REQUEST_DRIVER_TITLE)
                         notificationData.put(Common.NOTI_BODY,"This message represent for Request Driver action")
+
+                        notificationData.put(Common.RIDER_KEY,FirebaseAuth.getInstance().currentUser!!.uid)
+
                         notificationData.put(Common.PICKUP_LOCATION,StringBuilder()
                             .append(target.latitude)
                             .append(",")
