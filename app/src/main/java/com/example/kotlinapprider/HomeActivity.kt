@@ -26,6 +26,7 @@ import androidx.navigation.NavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.Glide.init
 import com.example.kotlinapprider.Common.Common
+import com.example.kotlinapprider.Model.RiderInfoModel
 import com.example.kotlinapprider.Utils.UserUtils
 import com.example.kotlinapprider.ui.home.HomeFragment
 import com.google.firebase.auth.FirebaseAuth
@@ -110,7 +111,11 @@ class HomeActivity : AppCompatActivity() {
             }
 
              if(it.itemId== R.id.nav_profil){
-                 startActivity(Intent(this,RiderProfileActivity::class.java))
+
+
+                goToRiderProfileActivity(Common.currentRider)
+
+               //  startActivity(Intent(this,RiderProfileActivity::class.java))
                  drawerLayout.closeDrawer(navView)
              }
              if(it.itemId== R.id.nav_home){
@@ -139,8 +144,7 @@ class HomeActivity : AppCompatActivity() {
             .load(Common.currentRider!!.avatar)
             .into(img_avatar);
 
-        if (Common.currentRider != null && Common.currentRider!!.avatar != null && TextUtils.isEmpty(
-                Common.currentRider!!.avatar)) {
+        if (Common.currentRider != null && Common.currentRider!!.avatar != null && TextUtils.isEmpty(Common.currentRider!!.avatar)) {
             Glide.with(getApplicationContext())
                 .load(Common.currentRider!!.avatar)
                 .into(img_avatar);
@@ -170,18 +174,13 @@ class HomeActivity : AppCompatActivity() {
 
     private fun showDialogUpload() {
         val builder = AlertDialog.Builder(this@HomeActivity)
-
         builder.setTitle("Change Profil Photo")
             .setMessage("Are you sure?")
             .setNegativeButton("Cancel") { dialog, id -> dialog.dismiss() }
-
             .setPositiveButton("Change") { dialog, id ->
-
                 if (imageUri != null) {
                     waitingDialog.show()
-                    val avatarFolder =
-                        storageReference.child("avatars/" + FirebaseAuth.getInstance().currentUser?.uid)
-
+                    val avatarFolder = storageReference.child("avatars/" + FirebaseAuth.getInstance().currentUser?.uid)
                     avatarFolder.putFile(imageUri!!)
                         .addOnFailureListener { e ->
                             Snackbar.make(drawerLayout, e.message!!, Snackbar.LENGTH_LONG).show()
@@ -195,7 +194,6 @@ class HomeActivity : AppCompatActivity() {
                                 }
                             }
                             waitingDialog.dismiss()
-
                         }.addOnProgressListener { taskSnapshot ->
                             val progress =
                                 (100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount)
@@ -203,19 +201,14 @@ class HomeActivity : AppCompatActivity() {
                                 StringBuilder("Uploading: ").append(progress).append("%")
                             )
                         }
-
                 }
-
             }.setCancelable(false)
-
         val dialog = builder.create()
         dialog.setOnShowListener {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE)
                 .setTextColor(ContextCompat.getColor(this@HomeActivity, android.R.color.holo_red_dark))
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
                 .setTextColor(ContextCompat.getColor(this@HomeActivity, R.color.colorAccent))
-
-
         }
         dialog.show()
     }
@@ -233,5 +226,16 @@ class HomeActivity : AppCompatActivity() {
 
     companion object {
         val PICK_IMAGE_REQUEST = 7272
+    }
+
+
+
+
+
+    private fun goToRiderProfileActivity(model: RiderInfoModel?) {
+        Common.currentRider=model
+        startActivity(Intent(this,RiderProfileActivity::class.java))
+        finish()
+
     }
 }

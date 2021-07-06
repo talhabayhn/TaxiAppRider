@@ -7,17 +7,28 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.example.kotlinapprider.Model.AnimationModel
 import com.example.kotlinapprider.Model.DriverGeoModel
 import com.example.kotlinapprider.Model.RiderInfoModel
 import com.example.kotlinapprider.R
+import com.example.kotlinapprider.RequestDriverActivity
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.maps.android.ui.IconGenerator
 import java.lang.StringBuilder
 import java.util.*
 import kotlin.collections.ArrayList
@@ -25,6 +36,21 @@ import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
 object Common {
+    val BASE_FARE: Double = 3.0 // setting table
+    val RIDER_TOTAL_FEE: String="TotalFeeRider"
+    val RIDER_DURATION_VALUE: String="DurationRiderValue"
+    val RIDER_DURATION_TEXT: String="DurationRider"
+    val RIDER_DISTANCE_VALUE: String= "DistanceRiderValue"
+    val RIDER_DISTANCE_TEXT: String= "DistanceRider"
+    val RIDER_REQUEST_COMPLETE_TRIP: String="RequestCompleteTripToRider"
+    val REQUEST_DRIVER_DECLINE_AND_REMOVE_TRIP: String="DeclineAndRemoveTrip"
+    val TRIP: String="Trips"
+    val TRIP_KEY: String= "TripKey"
+    val REQUEST_DRIVER_ACCEPT: String ="Accept"
+    val DESTINATION_LOCATION: String="DestinationLocation"
+    val DESTINATION_LOCATION_STRING: String="DestinationLocationString"
+    val PICKUP_LOCATION_STRING: String="PickupLocationString"
+    val REQUEST_DRIVER_DECLINE: String?= "Decline"
     val RIDER_KEY: String="RiderKey"
     val PICKUP_LOCATION: String= "PickupLocation"
     val REQUEST_DRIVER_TITLE: String= "RequestDriver"
@@ -179,6 +205,27 @@ object Common {
         va.repeatMode= ValueAnimator.RESTART
         va.start()
         return  va
+    }
+
+    fun createIconWithDuration(context: Context,duration: String): Bitmap? {
+        val view = LayoutInflater.from(context).inflate(R.layout.pickup_info_with_duration_windows,null)
+        val txt_time= view.findViewById<View>(R.id.txt_duration) as TextView
+        txt_time.setText(getNumberFromText(duration!!))
+        val generator = IconGenerator(context)
+        generator.setContentView(view)
+        generator.setBackground(ColorDrawable(Color.TRANSPARENT))
+        return  generator.makeIcon()
+    }
+
+    private fun getNumberFromText(s: String): String {
+        return  s.substring(0,s.indexOf(" "))
+    }
+
+    fun calculateFeeBaseOnMeters(meters: Int): Double {
+
+
+        val number : Double =((meters*BASE_FARE)/1000)
+     return  String.format("%.2f", number).toDouble();
     }
 
 

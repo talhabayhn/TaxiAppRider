@@ -69,6 +69,17 @@ class OpeningScreenActivity : AppCompatActivity() {
         init()
     }
     private fun init() {
+
+
+/*
+
+        val ref = FirebaseDatabase.getInstance().getReference("Settings").child("value")
+        val feeValue:String ="7"
+        ref.setValue(feeValue)*/
+
+
+
+
         database = FirebaseDatabase.getInstance()
         riderInfoRef =database.getReference(Common.RIDER_INFO_REFERENCE)
 
@@ -77,6 +88,8 @@ class OpeningScreenActivity : AppCompatActivity() {
                 AuthUI.IdpConfig.GoogleBuilder().build()
 
         )
+
+
 
         firebaseAuth= FirebaseAuth.getInstance()
         listener= FirebaseAuth.AuthStateListener  { myFirebaseAuth->
@@ -143,15 +156,12 @@ class OpeningScreenActivity : AppCompatActivity() {
                         {
                             val model = dataSnapshot.getValue(RiderInfoModel::class.java)
                             goToHomeActivity(model)
-                            //Toast.makeText(this@OpeningScreenActivity,"User already registered",Toast.LENGTH_SHORT).show()
                         }
                         else
                         {
                             showRegisterLayout()
                         }
                     }
-
-
                 })
     }
 

@@ -6,6 +6,7 @@ import android.widget.RelativeLayout
 import android.widget.Toast
 import com.example.kotlinapprider.Common.Common
 import com.example.kotlinapprider.Model.DriverGeoModel
+import com.example.kotlinapprider.Model.EventBus.SelectedPlaceEvent
 import com.example.kotlinapprider.Model.FCMSendData
 import com.example.kotlinapprider.Model.TokenModel
 import com.example.kotlinapprider.R
@@ -56,7 +57,7 @@ object UserUtils {
         context: Context,
         mainLayout: RelativeLayout?,
         foundDriver: DriverGeoModel?,
-        target: LatLng
+        selectedPlaceEvent: SelectedPlaceEvent
     ){
         val compositeDisposable= CompositeDisposable()
         val ifcmService= RetrofitFCMClient.instance!!.create(IFCMService::class.java)
@@ -65,23 +66,32 @@ object UserUtils {
         FirebaseDatabase.getInstance().getReference(Common.TOKEN_REFERENCE)
             .child(foundDriver!!.key!!).addListenerForSingleValueEvent(object : ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    if(snapshot.exists()){
+                    if(snapshot.exists())
+                    {
                         val tokenModel = snapshot.getValue(TokenModel::class.java)
 
                         val notificationData: MutableMap<String,String> = HashMap()
                         notificationData.put(Common.NOTI_TITLE,Common.REQUEST_DRIVER_TITLE)
                         notificationData.put(Common.NOTI_BODY,"This message represent for Request Driver action")
-
                         notificationData.put(Common.RIDER_KEY,FirebaseAuth.getInstance().currentUser!!.uid)
-
+                        notificationData.put(Common.PICKUP_LOCATION_STRING,selectedPlaceEvent.originAddress)
                         notificationData.put(Common.PICKUP_LOCATION,StringBuilder()
-                            .append(target.latitude)
+                            .append(selectedPlaceEvent.origin.latitude)
                             .append(",")
-                            .append(target.longitude)
+                            .append(selectedPlaceEvent.origin.longitude)
                             .toString())
-
+                        notificationData[Common.DESTINATION_LOCATION_STRING] = selectedPlaceEvent.destinationAddress
+                        notificationData[Common.DESTINATION_LOCATION] = StringBuilder()
+                            .append(selectedPlaceEvent.destination.latitude)
+                            .append(",")
+                            .append(selectedPlaceEvent.destination.longitude)
+                            .toString()
+                        notificationData[Common.RIDER_DISTANCE_TEXT]= selectedPlaceEvent.distanceText!!
+                        notificationData[Common.RIDER_DISTANCE_VALUE]= selectedPlaceEvent.distanceValue.toString()
+                        notificationData[Common.RIDER_DURATION_TEXT]= selectedPlaceEvent.durationText!!
+                        notificationData[Common.RIDER_DURATION_VALUE]= selectedPlaceEvent.durationValue.toString()
+                        notificationData[Common.RIDER_TOTAL_FEE]= selectedPlaceEvent.totalFee.toString()
                         val fcmSendData = FCMSendData(tokenModel!!.token,notificationData)
-
                         compositeDisposable.add(ifcmService.sendNotification(fcmSendData)!!
                             .subscribeOn(Schedulers.newThread())
                             .observeOn(AndroidSchedulers.mainThread())
@@ -98,25 +108,16 @@ object UserUtils {
 
                                 compositeDisposable.clear()
                                 Snackbar.make(mainLayout!!,t!!.message!!,Snackbar.LENGTH_LONG).show()
-
                             }))
-
-
-
-
-
                     }
                     else
                     {
                         Snackbar.make(mainLayout!!,context.getString(R.string.token_not_found),Snackbar.LENGTH_LONG).show()
                     }
                 }
-
                 override fun onCancelled(error: DatabaseError) {
                     Snackbar.make(mainLayout!!,error.message,Snackbar.LENGTH_LONG).show()
                 }
-
-
             })
     }
 

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">tway driver</string>
+    <string name="app_name">tway rider</string>
     <string name="title_activity_home">HomeActivity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -36,6 +36,13 @@
     <string name="finding_your_ride">Finding your ride...</string>
     <string name="token_not_found">Token not found</string>
     <string name="send_request_driver_failed">Request driver failed</string>
+    <string name="no_driver_accept">Thare are no driver that accept your request</string>
+    <string name="trip_not_found">Trip not found with key</string>
+    <string name="carType">Mercedes-Benz</string>
+    <string name="car_number">34 ABC 25</string>
+    <string name="driver_name_exp">Talha Bayhan</string>
+    <string name="distance">Distance</string>
+    <string name="time">Time</string>
 
 
 </resources>
